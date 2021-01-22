@@ -1,0 +1,65 @@
+@import 'variables.scss';
+.home{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    header{
+        h1{
+            font-family: $primaryFont;
+            color: $primaryColor;
+            width: max-content;
+            margin: 10px 20px;
+            font-size: 3em;
+        }
+    }
+    h2{
+        font-family: $secondaryFont;
+        color: $tertiaryColor;
+
+    }
+    p{
+        font-family: 'Times New Roman', Times, serif;
+        color: $tertiaryColor;
+    }
+    .chat-option{
+        display: flex;
+        background-color: $primaryColor;
+        min-height: 300px;
+        text-align: center;
+        min-width: 420px;
+        img{
+            width: 150px;
+            height: 150px;
+            margin: auto;
+            
+        }
+        div{
+            margin: 6px;
+            width: 50%;
+            position: relative;
+        }
+    }
+    form{
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        bottom: 10px;
+        input[type=text]{
+            padding: 5px;
+        }
+        input[type=submit]{
+            background-color: $secondaryColor;
+            outline: none;
+            border: none;
+            margin-top: 2px;
+            padding: 5px;
+            font-family: $primaryFont;
+            font-weight: bolder;
+            color: $primaryColor;
+        }
+    }
+}
+
