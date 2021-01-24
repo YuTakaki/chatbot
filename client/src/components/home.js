@@ -3,13 +3,17 @@ import stranger from '../assets/stranger.png';
 import group from '../assets/group.png';
 import '../styles/home.scss'
 import { INTERESTS } from '../context/interests';
+import { GROUP } from '../context/group';
 
 const Home = (props) => {
     const interests = useRef();
+    const groupName = useRef();
     const {interest_dispatch} = useContext(INTERESTS);
+    const {group_dispatch} = useContext(GROUP);
 
     const onToGroupChatBox = (e) => {
-        e.preventDefault()
+        e.preventDefault();
+        group_dispatch({type: 'SET_GROUPNAME', data : groupName.current.value})
         props.history.push('/group');
         
 
@@ -46,7 +50,7 @@ const Home = (props) => {
                         <img src={group} />
                         <p>Join a group chat that has the same interest as you</p>
                         <form onSubmit={onToGroupChatBox}>
-                            <input type='text' />
+                            <input ref={groupName} type='text' />
                             <input type='submit' value='Join Group' />
                         </form>
 

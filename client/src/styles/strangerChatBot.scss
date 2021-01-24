@@ -24,6 +24,7 @@
         width: 100%;
         display: flex;
         flex-direction: column;
+        overflow: auto;
         .others-message-content{
             padding: 10px;
             width: max-content;

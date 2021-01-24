@@ -11,11 +11,15 @@ const server = app.listen(port, () => {
     });
 
 const io = socket(server);
-const users = []
+let stranger_chatbox_users = [];
+let group_chatbox_users = [];
 io.sockets.on('connection', socket => {
-    require('./sockets/stranger')(socket, users)
-
+    require('./sockets/stranger')(socket, stranger_chatbox_users)
+    require('./sockets/groupchat')(socket, group_chatbox_users);
     socket.on('disconnect', () => {
-        console.log('disconnected');
+        stranger_chatbox_users = stranger_chatbox_users.filter(user => user !== socket.id);
+        group_chatbox_users = group_chatbox_users.filter(user => user.id !== socket.id);
+        console.log(stranger_chatbox_users);
+        console.log(group_chatbox_users);
     })
 })

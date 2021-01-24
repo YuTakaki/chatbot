@@ -1,9 +1,22 @@
+import {useEffect, useContext} from 'react';
+import { GROUP } from '../../context/group';
 import '../../styles/groupChatBot.scss';
+import { socket } from '../socket';
 
 const GroupChatBot = (props) => {
+    const {group} = useContext(GROUP);
     const leaveRoom = () => {
         props.history.push('/')
     }
+    useEffect(() => {
+        socket.connect();
+        console.log(group);
+        socket.emit('joinGroupChatbox', {groupName : group, name : ''});
+        return () => {
+            socket.disconnect()
+        }
+
+    })
     return(
         <div className='group-chatbox'>
             <div className='box1'>
