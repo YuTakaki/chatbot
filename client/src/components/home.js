@@ -13,18 +13,20 @@ const Home = (props) => {
 
     const onToGroupChatBox = (e) => {
         e.preventDefault();
-        group_dispatch({type: 'SET_GROUPNAME', data : groupName.current.value})
-        props.history.push('/group');
+        if(groupName.current.value !== ''){
+            group_dispatch({type: 'SET_GROUPNAME', data : groupName.current.value});
+            props.history.push('/group');
+        }else{
+            alert('group name should not be empty');
+        }
         
-
+        
     }
     const onToStrangerChatBox = (e) => {
         e.preventDefault();
         const interest = interests.current.value.split(" ");
         interest_dispatch({type: 'SET_INTERESTS', data : interest})
         props.history.push('/stranger-chatbot');
-        
-        
     }
 
     

@@ -15,7 +15,7 @@ let stranger_chatbox_users = [];
 let group_chatbox_users = [];
 io.sockets.on('connection', socket => {
     require('./sockets/stranger')(socket, stranger_chatbox_users)
-    require('./sockets/groupchat')(socket, group_chatbox_users);
+    require('./sockets/groupchat')(socket, group_chatbox_users, io);
     socket.on('disconnect', () => {
         stranger_chatbox_users = stranger_chatbox_users.filter(user => user !== socket.id);
         group_chatbox_users = group_chatbox_users.filter(user => user.id !== socket.id);

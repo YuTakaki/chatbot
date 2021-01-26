@@ -17,11 +17,23 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        h2{
+            font-family: $secondaryFont;
+            margin-top: 10px;
+            color: $secondaryColor;
+        }
         .users{
             height: 60%;
             width: 80%;
             background-color: $secondaryColor;
-            margin-top: 50px;
+            
+            overflow: auto;
+            padding: 10px;
+            
+            p{
+                font-family: 'Times New Roman', Times, serif;
+
+            }
         }
         form{
             display: flex;
@@ -121,6 +133,9 @@
                 font-size: 1.5em;
                 margin: 5px;
                 color: $tertiaryColor;
+            }
+            input{
+                display: none;
             }
         }
     }

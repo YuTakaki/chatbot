@@ -1,55 +1,103 @@
-import {useEffect, useContext} from 'react';
+import {useEffect, useContext, useRef, memo, useState} from 'react';
 import { GROUP } from '../../context/group';
 import '../../styles/groupChatBot.scss';
 import { socket } from '../socket';
-
+const randomUsername = () => {
+    const number = [...Array(10)].map((num, i) => i.toString() );
+    const bigLetter = [...Array(26)].map((num, i) => String.fromCharCode(i + 65));
+    const smallLetter = bigLetter.map(letter => letter.toLowerCase());
+    const random = [...number, ...bigLetter, ...smallLetter];
+    let user = '';
+    for (let i = 0; i < 7; i++){
+        const index =Math.floor(Math.random() * random.length);
+        user += random[index]  
+    }
+    return user
+}
 const GroupChatBot = (props) => {
-    const {group} = useContext(GROUP);
+    const {group, group_dispatch} = useContext(GROUP);
+    const [username, setUsername] = useState(randomUsername());
+    const [chats, setChats] = useState([]);
+    const [users, setUsers] = useState([]);
+    const chatInput = useRef();
+    const roomInput = useRef();
     const leaveRoom = () => {
         props.history.push('/')
     }
-    useEffect(() => {
+    useEffect(()=>{
         socket.connect();
-        console.log(group);
-        socket.emit('joinGroupChatbox', {groupName : group, name : ''});
+        socket.emit('joinGroupChatbox', {groupName : group, username});
+        socket.emit('getUsers', group);
+        
         return () => {
-            socket.disconnect()
+            socket.emit('disconnectGroupchatRoom', group);
+            socket.disconnect();
         }
 
-    })
+    }, [])
+    useEffect(() => {
+        socket.on('sending', message => {
+            console.log(chats);
+            setChats([...chats, message]);
+        });
+        socket.on('users', users => {
+            setUsers(users);
+        });
+        return () => {
+            socket.off('sending');
+            socket.off('users');
+        }
+    });
+    const sendMessage = (e) => {
+        e.preventDefault();
+        console.log(chatInput.current.value)
+        socket.emit('sendMessage', {message: chatInput.current.value, username});
+    }
+
+    const changeRoom = e => {
+        e.preventDefault();
+        group_dispatch({type:'SET_GROUPNAME', data: roomInput.current.value});
+        setChats([]);
+        socket.emit('joinGroupChatbox', {groupName : roomInput.current.value, username});
+        socket.emit('getUsers', roomInput.current.value);
+        roomInput.current.value = '';
+
+    }
     return(
         <div className='group-chatbox'>
             <div className='box1'>
+            <h2>{users.length === 0 ? 'No one is here yet' : `${users.length} users are in the room`}</h2>
                 <div className='users'>
+                    
+                    {users.map(user => (
+                        <p>{user.username}</p>
+                    ))}
 
                 </div>
-                <form>
-                    <input type='text'/>
+                <form onSubmit={changeRoom}>
+                    <input ref={roomInput} type='text'/>
                     <input type='submit' value='Join another Room' />
                 </form>
                 <button onClick={leaveRoom}>Leave Room</button>
             </div>
             <div className='box2'>
                 <div className='chatbox'>
-                    <div className='others-message-content'>
-                    <p>Yu Takaki</p>
-                    <div className='message'>
-                        <p>Commodo ullamco consequat fugiat deserunt excepteur cupidatat tempor ea. Sint labore ad nisi fugiat. Ex ut consequat sunt nisi aliquip nostrud officia elit enim quis cupidatat tempor cupidatat. Ullamco ex cillum amet enim magna.</p>
-                    </div>
-                    
-                </div>
-                <div className='users-message-content'>
-                    <p>Yu Takaki</p>
-                    <div className='message'>
-                        <p>Commodo ullamco consequat fugiat deserunt excepteur cupidatat tempor ea. Sint labore ad nisi fugiat. Ex ut consequat sunt nisi aliquip nostrud officia elit enim quis cupidatat tempor cupidatat. Ullamco ex cillum amet enim magna.</p>
-                    </div>
-                    
-                </div>
+                    {chats.map(chat => (
+                        <div className={chat.username === username ? 'users-message-content' : 'others-message-content'}>
+                            <p>{chat.username}</p>
+                            <div className='message'>
+                                <p>{chat.message}</p>
+                            </div>
+                            
+                        </div>
 
+                    ))}
                 </div>
-                <form>
-                    <textarea></textarea>
-                    <i className='fa fa-send-o'></i>
+                <form onSubmit={sendMessage}>
+                    <textarea ref={chatInput}></textarea>
+                    <label htmlFor='send'><i className='fa fa-send-o'></i></label>
+                    <input type='submit' id='send' />
+                    
                 </form>
             </div>
 
@@ -57,4 +105,4 @@ const GroupChatBot = (props) => {
     )
 }
 
-export default GroupChatBot
+export default memo(GroupChatBot)
