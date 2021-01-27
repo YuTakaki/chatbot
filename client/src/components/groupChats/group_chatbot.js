@@ -56,6 +56,7 @@ const GroupChatBot = (props) => {
 
     const changeRoom = e => {
         e.preventDefault();
+        socket.emit('disconnectGroupchatRoom', group);
         group_dispatch({type:'SET_GROUPNAME', data: roomInput.current.value});
         setChats([]);
         socket.emit('joinGroupChatbox', {groupName : roomInput.current.value, username});

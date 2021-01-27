@@ -1,14 +1,16 @@
 import '../../styles/strangerChatBot.scss';
-import React, {useEffect} from 'react';
+import React, {useEffect, useContext} from 'react';
 import { socket } from '../socket';
+import { INTERESTS } from '../../context/interests';
 
 const StrangerChatBot = (props) => {
+    const {interest} = useContext(INTERESTS);
     const leaveChat = () => {
         props.history.push('/')
     }
     useEffect(() => {
         socket.connect();
-        socket.emit('connectingStrangerChatbox', {interests : []});
+        socket.emit('connectingStrangerChatbox', {interest});
         return () => {
             socket.disconnect()
         }
