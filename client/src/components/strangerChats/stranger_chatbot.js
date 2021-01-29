@@ -11,9 +11,29 @@ const StrangerChatBot = (props) => {
     useEffect(() => {
         socket.connect();
         socket.emit('connectingStrangerChatbox', {interest});
-        socket.emit('findStranger')
+        socket.emit('findStranger');
+        socket.on('findStranger', user => {
+            console.log(user);
+            if(user){
+                socket.emit('checkUserIfReady')
+            }
+        });
+        socket.on('checkUserIfReady', user => {
+            console.log(user);
+            if(!user ){
+                socket.emit('checkUserIfReady')
+            }else{
+                console.log(user)
+            }
+        });
+        socket.on('matchComplete', user => {
+            console.log(user);
+        })
         return () => {
             socket.disconnect()
+            socket.off('findStranger');
+            socket.off('checkUserIfReady');
+            console.log('hi');
         }
 
     },[])

@@ -19,7 +19,7 @@ io.sockets.on('connection', socket => {
     socket.on('disconnect', () => {
         stranger_chatbox_users = stranger_chatbox_users.filter(user => user.id !== socket.id);
         group_chatbox_users = group_chatbox_users.filter(user => user.id !== socket.id);
-        console.log(stranger_chatbox_users);
-        console.log(group_chatbox_users);
+        console.log('leave');
+        socket.leave(socket.id);
     })
 })
