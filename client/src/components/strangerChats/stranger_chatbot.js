@@ -11,11 +11,12 @@ const StrangerChatBot = (props) => {
     useEffect(() => {
         socket.connect();
         socket.emit('connectingStrangerChatbox', {interest});
+        socket.emit('findStranger')
         return () => {
             socket.disconnect()
         }
 
-    })
+    },[])
     return (
         <div className='stranger-chatbox'>
             <header className='.header'>

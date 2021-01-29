@@ -19,8 +19,6 @@ const Home = (props) => {
         }else{
             alert('group name should not be empty');
         }
-        
-        
     }
     const onToStrangerChatBox = (e) => {
         e.preventDefault();
