@@ -1,17 +1,27 @@
 import '../../styles/strangerChatBot.scss';
-import React, {useEffect, useContext} from 'react';
+import React, {useEffect, useContext, useState} from 'react';
 import { socket } from '../socket';
 import { INTERESTS } from '../../context/interests';
 
 const StrangerChatBot = (props) => {
+    const [chatActive, setChatActive] = useState(false);
+    const [sendTo, setSendTo] = useState(null);
+    const [chats, setChats] = useState([]);
     const {interest} = useContext(INTERESTS);
     const leaveChat = () => {
+        // socket.emit('endStrangerConnection');
         props.history.push('/')
+    }
+    const stopChat = () => {
+        socket.emit('endStrangerConnection');
     }
     useEffect(() => {
         socket.connect();
         socket.emit('connectingStrangerChatbox', {interest});
         socket.emit('findStranger');
+        socket.on('updateUsers', (users) => {
+            socket.emit('updateUsers', users)
+        })
         socket.on('findStranger', user => {
             console.log(user);
             if(user){
@@ -23,25 +33,40 @@ const StrangerChatBot = (props) => {
             if(!user ){
                 socket.emit('checkUserIfReady')
             }else{
-                console.log(user)
+                console.log(user);
+                setChatActive(true);
             }
         });
         socket.on('matchComplete', user => {
             console.log(user);
-        })
+            setChatActive(true);
+        });
+        socket.on('endStrangerConnection', () => {
+            setChatActive(false);
+            setChats([]);
+            setSendTo(null);
+        });
         return () => {
-            socket.disconnect()
+            socket.disconnect();
+            socket.off('matchComplete');
+            socket.off('updateUsers');
             socket.off('findStranger');
             socket.off('checkUserIfReady');
             console.log('hi');
         }
+    },[]);
 
-    },[])
+    
     return (
         <div className='stranger-chatbox'>
             <header className='.header'>
                 <i onClick={leaveChat} className='fa fa-arrow-left'></i>
-                <button className='fa fa-arrow-right'>Next</button>
+                {chatActive ? (
+                    <button onClick={stopChat} className='fa fa-arrow-right'>Stop</button>
+                ) : (
+                    <button className='fa fa-arrow-right'>Next</button>
+                )}
+                
             </header>
             <div className='interests'>
 

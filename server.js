@@ -14,12 +14,12 @@ const io = socket(server);
 let stranger_chatbox_users = [];
 let group_chatbox_users = [];
 io.sockets.on('connection', socket => {
-    require('./sockets/stranger')(socket, stranger_chatbox_users)
+    require('./sockets/stranger')(socket, stranger_chatbox_users, io);
     require('./sockets/groupchat')(socket, group_chatbox_users, io);
     socket.on('disconnect', () => {
         stranger_chatbox_users = stranger_chatbox_users.filter(user => user.id !== socket.id);
         group_chatbox_users = group_chatbox_users.filter(user => user.id !== socket.id);
-        console.log('leave');
+        console.log(stranger_chatbox_users);
         socket.leave(socket.id);
     })
 })
