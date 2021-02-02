@@ -15,13 +15,17 @@ const StrangerChatBot = (props) => {
     const stopChat = () => {
         socket.emit('endStrangerConnection');
     }
+    const nextChat = () => {
+        socket.emit('findStranger');
+
+    }
     useEffect(() => {
         socket.connect();
         socket.emit('connectingStrangerChatbox', {interest});
         socket.emit('findStranger');
-        socket.on('updateUsers', (users) => {
-            socket.emit('updateUsers', users)
-        })
+        // socket.on('updateUsers', (users) => {
+        //     socket.emit('updateUsers', users)
+        // })
         socket.on('findStranger', user => {
             console.log(user);
             if(user){
@@ -47,11 +51,14 @@ const StrangerChatBot = (props) => {
             setSendTo(null);
         });
         return () => {
-            socket.disconnect();
+            socket.emit('disconnectingStrangerChatbox');
             socket.off('matchComplete');
             socket.off('updateUsers');
             socket.off('findStranger');
             socket.off('checkUserIfReady');
+            socket.disconnect();
+            
+            
             console.log('hi');
         }
     },[]);
@@ -64,7 +71,7 @@ const StrangerChatBot = (props) => {
                 {chatActive ? (
                     <button onClick={stopChat} className='fa fa-arrow-right'>Stop</button>
                 ) : (
-                    <button className='fa fa-arrow-right'>Next</button>
+                    <button onClick={nextChat} className='fa fa-arrow-right'>Next</button>
                 )}
                 
             </header>
