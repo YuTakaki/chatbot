@@ -1,5 +1,5 @@
 import '../../styles/strangerChatBot.scss';
-import React, {useEffect, useContext, useState} from 'react';
+import React, {useEffect, useContext, useState, useRef} from 'react';
 import { socket } from '../socket';
 import { INTERESTS } from '../../context/interests';
 
@@ -17,17 +17,43 @@ const StrangerChatBot = (props) => {
         socket.emit('endStrangerConnection');
     }
     const nextChat = () => {
+        setChats([]);
+        setSendTo(null);
         socket.emit('findStranger');
         setIsLoading(true);
 
+    }
+
+    const message = useRef();
+    const form = useRef();
+
+    const sendMessage = e => {
+        e.preventDefault();
+        console.log(sendTo);
+        if(sendTo !== null && message.current.value.length > 0){
+            console.log(message.current.value);
+            socket.emit('sendMessageToStranger', {message : message.current.value, sendTo})
+            message.current.value = '';
+        }
+    }
+
+    const textareaHandleChange = (e) => {
+        if(e.charCode === 13){
+            sendMessage(form.current);
+        }
     }
     useEffect(() => {
         socket.connect();
         socket.emit('connectingStrangerChatbox', {interest});
         socket.emit('findStranger');
-        // socket.on('updateUsers', (users) => {
-        //     socket.emit('updateUsers', users)
-        // })
+        return () => {
+            socket.emit('endStrangerConnection');
+            socket.emit('disconnectingStrangerChatbox');
+            socket.disconnect();
+        }
+    },[]);
+
+    useEffect(() => {
         socket.on('findStranger', user => {
             console.log(user);
             if(user){
@@ -39,34 +65,39 @@ const StrangerChatBot = (props) => {
             if(!user ){
                 socket.emit('checkUserIfReady')
             }else{
-                console.log(user);
+                setSendTo(user);
                 setChatActive(true);
                 setIsLoading(false);
             }
         });
         socket.on('matchComplete', user => {
-            console.log(user);
+            setSendTo(user);
             setChatActive(true);
             setIsLoading(false);
         });
         socket.on('endStrangerConnection', () => {
             setChatActive(false);
-            setChats([]);
-            setSendTo(null);
+            
+            
         });
+
+        socket.on('sendMessageToStranger', (data) => {
+            
+            const updatedChats = [...chats, data];
+            console.log(updatedChats)
+            setChats([...chats, data]);
+        });
+
         return () => {
-            socket.emit('endStrangerConnection');
-            socket.emit('disconnectingStrangerChatbox');
+            
             socket.off('matchComplete');
+            socket.off('sendMessageToStranger');
+            socket.off('endStrangerConnection');
             socket.off('updateUsers');
             socket.off('findStranger');
             socket.off('checkUserIfReady');
-            socket.disconnect();
-            
-            
-            console.log('hi');
         }
-    },[]);
+    })
 
     
     return (
@@ -84,25 +115,20 @@ const StrangerChatBot = (props) => {
 
             </div>
             <div className='chatbox'>
-                <div className='others-message-content'>
-                    <p>Yu Takaki</p>
-                    <div className='message'>
-                        <p>Commodo ullamco consequat fugiat deserunt excepteur cupidatat tempor ea. Sint labore ad nisi fugiat. Ex ut consequat sunt nisi aliquip nostrud officia elit enim quis cupidatat tempor cupidatat. Ullamco ex cillum amet enim magna.</p>
+                {chats.map(chat => (
+                    <div className={chat.sender !== sendTo ? 'users-message-content' : 'others-message-content'}>
+                        <div className='message'>
+                            <p>{chat.message}</p>
+                        </div>
                     </div>
-                    
-                </div>
-                <div className='users-message-content'>
-                    <p>Yu Takaki</p>
-                    <div className='message'>
-                        <p>Commodo ullamco consequat fugiat deserunt excepteur cupidatat tempor ea. Sint labore ad nisi fugiat. Ex ut consequat sunt nisi aliquip nostrud officia elit enim quis cupidatat tempor cupidatat. Ullamco ex cillum amet enim magna.</p>
-                    </div>
-                    
-                </div>
+
+                ))}
 
             </div>
-            <form>
-                <textarea></textarea>
-                <i className='fa fa-send-o'></i>
+            <form onSubmit={sendMessage} useRef={form}>
+                <textarea ref={message} onKeyPress={textareaHandleChange}></textarea>
+                <label htmlFor='send'><i className='fa fa-send-o'></i></label>
+                <input type='submit' id='send'/>
             </form>
         </div>
     )

@@ -93,5 +93,8 @@
             margin: 10px;
             color: $tertiaryColor;
         }
+        input[type=submit]{
+            display: none;
+        }
     }
 }

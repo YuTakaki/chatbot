@@ -50,8 +50,9 @@ const GroupChatBot = (props) => {
     });
     const sendMessage = (e) => {
         e.preventDefault();
-        console.log(chatInput.current.value)
-        socket.emit('sendMessage', {message: chatInput.current.value, username});
+        if(chatInput.current.value.length > 0){
+            socket.emit('sendMessage', {message: chatInput.current.value, username});
+        }
     }
 
     const changeRoom = e => {

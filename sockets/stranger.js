@@ -7,7 +7,9 @@ module.exports = (socket, io) => {
         User.create({_id : socket.id, interest});
     });
 
-    socket.on('updateUsers', data => {
+    socket.on('sendMessageToStranger', ({message, sendTo}) => {
+        socket.to(sendTo).emit('sendMessageToStranger', {sender: socket.id, message});
+        socket.emit('sendMessageToStranger', {sender: socket.id, message});
     });
 
     socket.on('findStranger', () => {
@@ -53,50 +55,6 @@ module.exports = (socket, io) => {
                     })
             })
     })
-
-
-    // socket.on('findStranger', () => {
-    //     const currentUser = users.filter(user => user.id === socket.id)[0];
-    //     if(currentUser.connectedTo === null){
-    //         users = users.map(user => {
-    //             if(user.id === socket.id){
-    //                 user.connectedTo = 'available';
-    //             }
-    //             return user;
-    //         });
-    //         let sameInterestUser;
-    //         if(currentUser.interest[0] === ''){
-    //             sameInterestUser = users.filter(user => user.id !== socket.id && user.connectedTo === 'available');
-
-    //         }else{
-    //             sameInterestUser = users.filter(user => user.interest.some(interest => currentUser.interest.includes(interest)) && user.id !== socket.id && user.connectedTo === 'available');
-
-    //         }
-    //         // console.log(sameInterestUser);
-    //         let random = Math.floor(Math.random() * sameInterestUser.length);
-    //         const stranger = sameInterestUser[random];
-    //         if(stranger !== undefined){
-    //             users = users.map(user => {
-    //                 if(user.id === socket.id){
-    //                     user.connectedTo = stranger.id;
-    //                     user.ready = true;
-    //                 }
-    //                 if(user.id === stranger.id){
-    //                     user.connectedTo = socket.id;
-    //                 }
-    //                 return user;
-    //             });
-    //             io.emit('updateUsers', {users});
-    //             socket.emit('findStranger',users)
-    //         }else{
-    //             socket.emit('findStranger',false)
-
-    //         }
-            
-    //     }
-        
-        
-    // });
 
     socket.on('endStrangerConnection', () => {
         User.find()
@@ -166,28 +124,6 @@ module.exports = (socket, io) => {
         })
 
     });
-
-    // socket.on('checkUserIfReady', () => {
-    //     const currentUser = users.filter(user => user.id === socket.id)[0];
-    //     const stranger = users.filter(user => user.id == currentUser.connectedTo)[0];
-    //     if(!stranger.ready){
-    //         users = users.map(user => {
-    //             if(user.id === stranger.id){
-    
-    //                 user.ready = true;
-    //             }
-    //             return user;
-    //         });
-    //         io.emit('updateUsers', {users});
-    //         socket.to(stranger.id).emit('matchComplete',socket.id);
-    //     }
-        
-    //     if(currentUser.ready && stranger.ready){
-    //         socket.emit('checkUserIfReady', stranger.id);
-    //     }else{
-    //         socket.emit('checkUserIfReady', false);
-    //     }
-    // })
 
     socket.on('disconnectingStrangerChatbox', ()=>{
         User.findOneAndDelete({_id : socket.id})
