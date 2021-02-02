@@ -5,6 +5,7 @@ import { INTERESTS } from '../../context/interests';
 
 const StrangerChatBot = (props) => {
     const [chatActive, setChatActive] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [sendTo, setSendTo] = useState(null);
     const [chats, setChats] = useState([]);
     const {interest} = useContext(INTERESTS);
@@ -17,6 +18,7 @@ const StrangerChatBot = (props) => {
     }
     const nextChat = () => {
         socket.emit('findStranger');
+        setIsLoading(true);
 
     }
     useEffect(() => {
@@ -39,11 +41,13 @@ const StrangerChatBot = (props) => {
             }else{
                 console.log(user);
                 setChatActive(true);
+                setIsLoading(false);
             }
         });
         socket.on('matchComplete', user => {
             console.log(user);
             setChatActive(true);
+            setIsLoading(false);
         });
         socket.on('endStrangerConnection', () => {
             setChatActive(false);
@@ -51,6 +55,7 @@ const StrangerChatBot = (props) => {
             setSendTo(null);
         });
         return () => {
+            socket.emit('endStrangerConnection');
             socket.emit('disconnectingStrangerChatbox');
             socket.off('matchComplete');
             socket.off('updateUsers');
@@ -71,7 +76,7 @@ const StrangerChatBot = (props) => {
                 {chatActive ? (
                     <button onClick={stopChat} className='fa fa-arrow-right'>Stop</button>
                 ) : (
-                    <button onClick={nextChat} className='fa fa-arrow-right'>Next</button>
+                    <button onClick={nextChat} className='fa fa-arrow-right' disabled={isLoading}>Next</button>
                 )}
                 
             </header>

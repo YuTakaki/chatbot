@@ -18,6 +18,10 @@
             color: $tertiaryColor;
             font-size: 1.5em;
         }
+        button:disabled,
+        button[disabled]{
+        opacity: 0.5;
+        }
     }
     .chatbox{
         height: 100%;
