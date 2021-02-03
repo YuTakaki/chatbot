@@ -15,11 +15,13 @@ module.exports = (socket, io) => {
     socket.on('findStranger', () => {
         User.findOne({_id : socket.id})
             .then(user => {
-                if(user.connectedTo === null){
+                if(user.connectedTo === 'null'){
                     user.connectedTo = 'available';
                 }
+                
                 user.save()
                     .then(user => {
+                        let currentUser = user;
                         User.find()
                             .then(users => {
                                 let sameInterestUser;
@@ -33,7 +35,7 @@ module.exports = (socket, io) => {
                                 if(stranger !== undefined){
                                     User.findById(socket.id)
                                         .then(user => {
-                                            user.connectedTo = stranger.id;
+                                            user.connectedTo = stranger._id;
                                             user.ready = true;
                                             user.save()
                                                 .then(user => {
@@ -61,42 +63,37 @@ module.exports = (socket, io) => {
             .then(users => {
                 const currentUser = users.filter(user => user._id === socket.id)[0];
                 const stranger = users.filter(user => user._id === currentUser.connectedTo)[0];
-                users = users.map(user => {
-                    if(user.id === currentUser.id){
-                        user.connectedTo = null;
-                        user.ready = false;
-                    }
-                    if(user.id === stranger.id){
-                        user.connectedTo = null;
-                        user.ready = false;
-                    }
-                    return user
-                });
                 User.findById(currentUser._id)
                     .then(user => {
-                        user.connectedTo = null;
+                        user.connectedTo = 'null';
                         user.ready = false;
                         user.save()
                             .then(() => {
-                                User.findById(stranger._id)
-                                    .then(user => {
-                                        user.connectedTo = null;
-                                        user.ready = false;
-                                        user.save()
-                                            .then(() => {
-                                                socket.to(stranger.id).emit('endStrangerConnection');
-                                                socket.emit('endStrangerConnection');
-                                                User.find()
-                                                    .then(users => {
-                                                        console.log(users);
-                                                    })
-                                            })
-                                    })
+                                if(stranger !== undefined){
+                                    User.findById(stranger._id)
+                                        .then(user => {
+                                            user.connectedTo = 'null';
+                                            user.ready = false;
+                                            user.save()
+                                                .then(() => {
+                                                    socket.to(stranger._id).emit('endStrangerConnection');
+                                                    socket.emit('endStrangerConnection');
+                                                    User.find()
+                                                        .then(users => {
+                                                            console.log(users);
+                                                        })
+                                                })
+                                        }) 
+                                }
                             })
                     })
             })
         
     });
+
+    socket.on('sample',()=>{
+        console.log('samlpe');
+    })
 
     socket.on('checkUserIfReady', () => {
         User.find()
@@ -126,7 +123,5 @@ module.exports = (socket, io) => {
     });
 
     socket.on('disconnectingStrangerChatbox', ()=>{
-        User.findOneAndDelete({_id : socket.id})
-        .then(user => console.log(user));
     })
 }

@@ -46,7 +46,15 @@ const StrangerChatBot = (props) => {
         socket.connect();
         socket.emit('connectingStrangerChatbox', {interest});
         socket.emit('findStranger');
+        window.addEventListener('beforeunload', (e) => {
+            e.returnValue = `Are you sure you want to leave?`;
+            socket.emit('endStrangerConnection');
+            socket.emit('disconnectingStrangerChatbox');
+            socket.disconnect();
+
+        }, false)
         return () => {
+            socket.emit('sample');
             socket.emit('endStrangerConnection');
             socket.emit('disconnectingStrangerChatbox');
             socket.disconnect();

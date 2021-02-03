@@ -9,7 +9,7 @@ const userSchema = new Schema({
     interest : [{type : String}],
     connectedTo : {
         type : String,
-        default : null
+        default : 'null'
     },
     ready : {
         type : Boolean,

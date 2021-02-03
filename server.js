@@ -1,6 +1,7 @@
 const express = require('express');
 const socket = require('socket.io');
 const mongoose = require('mongoose');
+const User = require('./models/users');
 
 mongoose.Promise = global.Promise;
 
@@ -27,7 +28,11 @@ io.sockets.on('connection', socket => {
     socket.on('disconnect', () => {
         stranger_chatbox_users = stranger_chatbox_users.filter(user => user.id !== socket.id);
         group_chatbox_users = group_chatbox_users.filter(user => user.id !== socket.id);
-        console.log(stranger_chatbox_users);
+        User.findOneAndDelete({_id : socket.id}).then(user=>{
+            console.log(user);
+        })
+        console.log('leave ' + socket.id);
         socket.leave(socket.id);
+        
     })
 })
